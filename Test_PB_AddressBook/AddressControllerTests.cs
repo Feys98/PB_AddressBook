@@ -11,7 +11,7 @@ namespace Test_PB_AddressBook;
 public class AddressControllerTests
 {
     [Fact]
-    public async Task Test_GetLastAddress_ReturnLastAddress()
+    public async Task Test_GetLastAddress_ShouldReturnLastAddress()
     {
         //Arange
         var service = new Mock<IAddressBookService>();
@@ -21,7 +21,6 @@ public class AddressControllerTests
         var expectedData = TestData.GetAddressBookTestData().Last();
 
         //Act
-
         var result = await addressController.GetLastAddress() as OkObjectResult;
 
         //Assert
@@ -43,7 +42,7 @@ public class AddressControllerTests
     }
 
     [Fact]
-    public async Task Test_GetLastAddress_ReturnEmptyAddressBooks()
+    public async Task Test_GetLastAddress_ShouldReturnEmptyAddressBooks()
     {
         //Arange
         var service = new Mock<IAddressBookService>();
@@ -51,7 +50,6 @@ public class AddressControllerTests
         var addressController = new AddressController(service.Object);
 
         //Act
-
         var result = await addressController.GetLastAddress() as BadRequestObjectResult;
 
         //Assert
@@ -74,7 +72,6 @@ public class AddressControllerTests
         var addressController = new AddressController(service.Object);
 
         //Act
-
         var result = await addressController.GetAddressBook(testCity) as OkObjectResult;
 
         //Assert
@@ -89,13 +86,13 @@ public class AddressControllerTests
         resultData.Should().BeEquivalentTo(expectedData);
     }
     [Fact]
-    public async Task Test_GetBy_ReturnEmptyAddressBookByCity()
+    public async Task Test_GetAddressBook_ShouldReturnEmptyAddressBookByCity()
     {
         //Arange
         var service = new Mock<IAddressBookService>();
 
         var testCity = "no city";
-        var expectedData = new List<AddressBook>{};
+        var expectedData = TestData.GetEmptyAddressBookTestData();
 
         service.Setup(x => x.GetBy(y => y.City == testCity))
             .ReturnsAsync(TestData.GetEmptyAddressBookTestData());
@@ -103,7 +100,6 @@ public class AddressControllerTests
 
 
         //Act
-
         var result = await addressController.GetAddressBook(testCity) as OkObjectResult;
 
         //Assert
@@ -118,4 +114,3 @@ public class AddressControllerTests
         resultData.Should().BeEquivalentTo(expectedData);
     }
 }
-
