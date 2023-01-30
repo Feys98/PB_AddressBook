@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PB_AddressBook.DataBaseContext;
 using PB_AddressBook.Model;
+using PB_AddressBook.Services;
 
 namespace PB_AddressBook.Controllers
 {
@@ -14,21 +15,22 @@ namespace PB_AddressBook.Controllers
     [ApiController]
     public class AddressController : ControllerBase
     {
-        private readonly DatabaseContext _context;
+        private readonly IAddressBookService _service;
 
-        public AddressController(DatabaseContext context)
+        public AddressController(IAddressBookService service)
         {
-            _context = context;
+            _service = service;
         }
+
 
         // GET: api/Address/LastAddress
         [HttpGet("LastAddress")]
-        public async Task<ActionResult<IEnumerable<AddressBook>>> GetLastAddress()
+        public async Task<IActionResult> GetLastAddress()
         {
             AddressBook address;
             try
             {
-                address = (await _context.Address.ToListAsync()).Last();
+                address = (await _service.GetAll()).Last();
             }
             catch (Exception e)
             {
@@ -44,7 +46,7 @@ namespace PB_AddressBook.Controllers
             List<AddressBook> addresses;
             try
             {
-                addresses = await _context.Address.Where(x => x.City == city).ToListAsync();
+                addresses = await _service.GetBy(x => x.City == city);
             }
             catch (Exception e)
             {
@@ -62,22 +64,13 @@ namespace PB_AddressBook.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(addressBook).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _service.Update(addressBook);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!AddressBookExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(e.Message);
             }
 
             return NoContent();
@@ -89,8 +82,7 @@ namespace PB_AddressBook.Controllers
         {
             try
             {
-                _context.Address.Add(addressBook);
-                await _context.SaveChangesAsync();
+                await _service.Create(addressBook);
             }
             catch (Exception e)
             {
@@ -99,25 +91,21 @@ namespace PB_AddressBook.Controllers
             return CreatedAtAction("GetLastAddress", new { id = addressBook.Id }, addressBook);
         }
 
-        // DELETE: api/Address/<id>
+        //DELETE: api/Address/<id>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAddressBook(int id)
         {
-            var addressBook = await _context.Address.FindAsync(id);
-            if (addressBook == null)
+            try
             {
-                return NotFound();
+                var address = await _service.GetSingle(id);
+                await _service.Delete(address);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
 
-            _context.Address.Remove(addressBook);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool AddressBookExists(int id)
-        {
-            return _context.Address.Any(e => e.Id == id);
         }
     }
 }

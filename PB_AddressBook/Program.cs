@@ -1,4 +1,5 @@
 using PB_AddressBook.DataBaseContext;
+using PB_AddressBook.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,9 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
+
+// Configure Services
+builder.Services.AddScoped<IAddressBookService, AddressBookService>();
 
 var app = builder.Build();
 

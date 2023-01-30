@@ -11,6 +11,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.13" />
     <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <InternalsVisibleTo Include="$(AssemblyName).Test" />
   </ItemGroup>
+    
+
 
 </Project>
